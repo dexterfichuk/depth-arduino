@@ -11,10 +11,11 @@
 
 OneWire  ds(8);  // on pin 10 (a 4.7K resistor is necessary)
 int ph_pin = A2; //This is the pin number connected to Po for PH 
-float offset = 0.37; //Calculated from measuring with chem thing
+float offset = 0.0; //Calculated from measuring with chem thing
 dht DHT;
 
-#define DHT11_PIN 2
+#define DHT11_PIN 2 //Air sensor pin
+
 void setup(void) {
   Serial.begin(9600);
 }
@@ -27,13 +28,22 @@ struct air_result {
   } values;
 
 void pH(){
-  int measure = analogRead(ph_pin);
+  int measure;
+  int n = 15;
+  float voltage; //classic digital to voltage conversion
 
-  double voltage = 5 / 1024.0 * measure; //classic digital to voltage conversion
-
+  float Po = 0;
+  for (int i = 0; i < n; i++){ //Loop to make sum
+    measure = analogRead(ph_pin);
+    voltage = (5 / 1024.0 * measure) - 0.037;
+    Po += (7 + ((2.5 - voltage) / 0.18)) + offset;
+    Serial.println(voltage, 5);
+    delay(100);
+  }
   // PH_step = (voltage@PH7 - voltage@PH4) / (PH7 - PH4)
   // PH_probe = PH7 - ((voltage@PH7 - voltage@probe) / PH_step)
-  float Po = (7 + ((2.5 - voltage) / 0.18)) + offset;
+  Po /= n;
+  
   values.pH = Po;
 }
 int air(){
