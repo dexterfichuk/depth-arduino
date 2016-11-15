@@ -37,7 +37,7 @@ void pH(){
     measure = analogRead(ph_pin);
     voltage = (5 / 1024.0 * measure) - 0.037;
     Po += (7 + ((2.5 - voltage) / 0.18)) + offset;
-    Serial.println(voltage, 5);
+//    Serial.println(voltage, 5);
     delay(100);
   }
   // PH_step = (voltage@PH7 - voltage@PH4) / (PH7 - PH4)
@@ -158,7 +158,8 @@ void loop(void) {
   Serial.print("pH = ");
   Serial.print(values.pH);
   Serial.println();
-  
-  delay(2000);
+
+  //Already delayed in the ph calculations
+  //delay(2000);
 
 }
