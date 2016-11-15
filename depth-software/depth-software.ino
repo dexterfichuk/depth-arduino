@@ -1,5 +1,7 @@
 #include <OneWire.h>
 
+//Used for Air Temp/Humidity
+#include <dht.h>
 // OneWire DS18S20, DS18B20, DS1822 Temperature Example
 //
 // http://www.pjrc.com/teensy/td_libs_OneWire.html
@@ -9,8 +11,59 @@
 
 OneWire  ds(8);  // on pin 10 (a 4.7K resistor is necessary)
 
+dht DHT;
+
+#define DHT11_PIN 2
 void setup(void) {
   Serial.begin(9600);
+}
+
+struct air_result { 
+  float temp; 
+  float humid;
+  } values;
+
+
+int air(){
+  // READ DATA
+  Serial.print("DHT11, \t");
+  int chk = DHT.read11(DHT11_PIN);
+  switch (chk)
+  {
+    case DHTLIB_OK:  
+    Serial.print("OK,\t"); 
+    break;
+    case DHTLIB_ERROR_CHECKSUM: 
+    Serial.print("Checksum error,\t"); 
+    break;
+    case DHTLIB_ERROR_TIMEOUT: 
+    Serial.print("Time out error,\t"); 
+    break;
+    case DHTLIB_ERROR_CONNECT:
+        Serial.print("Connect error,\t");
+        break;
+    case DHTLIB_ERROR_ACK_L:
+        Serial.print("Ack Low error,\t");
+        break;
+    case DHTLIB_ERROR_ACK_H:
+        Serial.print("Ack High error,\t");
+        break;
+    default: 
+    Serial.print("Unknown error,\t"); 
+    break;
+  }
+  // DISPLAY DATA
+  float temp = DHT.temperature;
+  float humid = DHT.humidity;
+  Serial.print(humid);
+  Serial.print(",\t");
+  Serial.println(temp);
+  
+//  delay(2000);
+  
+  values.temp = temp;
+  values.humid = humid;
+  return 1;
 }
 
 float waterTemp(){
@@ -84,10 +137,20 @@ float waterTemp(){
 
 void loop(void) {
   float celsius = waterTemp();
-
-  Serial.print("  Temperature = ");
+  
+  air();
+  
+  Serial.print("Water Temperature = ");
   Serial.print(celsius);
   Serial.print(" Celsius");
-  delay(1000);
+  Serial.println();
+  Serial.print("Air Moisture = ");
+  Serial.print(values.humid);
+  Serial.println();
+  Serial.print("Air Temperature = ");
+  Serial.print(values.temp);
+  Serial.print(" Celsius");
+  Serial.println();
+  delay(2000);
 
 }
