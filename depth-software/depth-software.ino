@@ -2,6 +2,10 @@
 
 //Used for Air Temp/Humidity
 #include <dht.h>
+
+//For ethernet module
+#include <UIPEthernet.h>
+
 // OneWire DS18S20, DS18B20, DS1822 Temperature Example
 //
 // http://www.pjrc.com/teensy/td_libs_OneWire.html
