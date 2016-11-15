@@ -10,6 +10,14 @@
 // http://milesburton.com/Dallas_Temperature_Control_Library
 
 OneWire  ds(8);  // on pin 10 (a 4.7K resistor is necessary)
+#define SensorPin A2            //pH meter Analog output to Arduino Analog Input 2
+#define Offset 0.00            //deviation compensate
+#define LED 13
+#define samplingInterval 20
+#define printInterval 800
+#define ArrayLenth  40    //times of collection
+int pHArray[ArrayLenth];   //Store the average value of the sensor feedback
+int pHArrayIndex=0; 
 
 dht DHT;
 
@@ -18,10 +26,11 @@ void setup(void) {
   Serial.begin(9600);
 }
 
-struct air_result { 
+struct results { 
   float airTemp; 
   float humid;
   float waterTemp;
+  float pHlvl;
   } values;
 
 
@@ -113,21 +122,99 @@ void waterTemp(){
   return 1;
 }
 
+void pH(){
+  static unsigned long samplingTime = millis();
+  static unsigned long printTime = millis();
+  static float pHValue,voltage;
+  for (int i = 0; i < 20; i++){
+  
+   delay(100);
+  if(millis()-samplingTime > samplingInterval)
+  {
+      pHArray[pHArrayIndex++]=analogRead(SensorPin);
+      if(pHArrayIndex==ArrayLenth)pHArrayIndex=0;
+      voltage = avergearray(pHArray, ArrayLenth)*5.0/1024;
+      pHValue = 3.5*voltage+Offset;
+      samplingTime=millis();
+  }
+  if(millis() - printTime > printInterval)   //Every 800 milliseconds, print a numerical, convert the state of the LED indicator
+  {
+  Serial.print("Voltage:");
+        Serial.print(voltage,2);
+        Serial.print("    pH value: ");
+  Serial.println(pHValue,2);
+        digitalWrite(LED,digitalRead(LED)^1);
+        printTime=millis();
+        
+  }
+  values.pHlvl = pHValue;
+  }
+  return 1;
+}
+double avergearray(int* arr, int number){
+  int i;
+  int max,min;
+  double avg;
+  long amount=0;
+  if(number<=0){
+    Serial.println("Error number for the array to avraging!/n");
+    return 0;
+  }
+  if(number<5){   //less than 5, calculated directly statistics
+    for(i=0;i<number;i++){
+      amount+=arr[i];
+    }
+    avg = amount/number;
+    return avg;
+  }else{
+    if(arr[0]<arr[1]){
+      min = arr[0];max=arr[1];
+    }
+    else{
+      min=arr[1];max=arr[0];
+    }
+    for(i=2;i<number;i++){
+      if(arr[i]<min){
+        amount+=min;        //arr<min
+        min=arr[i];
+      }else {
+        if(arr[i]>max){
+          amount+=max;    //arr>max
+          max=arr[i];
+        }else{
+          amount+=arr[i]; //min<=arr<=max
+        }
+      }//if
+    }//for
+    avg = (double)amount/(number-2);
+  }//if
+  //values.pH = avg;
+  return avg;
+}
+
 void loop(void) {
   waterTemp();
   
   air();
   
+  pH();
+  
   Serial.print("Water Temperature = ");
   Serial.print(values.waterTemp);
   Serial.print(" Celsius");
   Serial.println();
+  
+   Serial.print("Air Temperature = ");
+  Serial.print(values.airTemp);
+  Serial.print(" Celsius");
+  Serial.println();
+  
   Serial.print("Air Humidity = ");
   Serial.print(values.humid);
   Serial.println();
-  Serial.print("Air Temperature = ");
-  Serial.print(values.airTemp);
-  Serial.print(" Celsius");
+
+  Serial.print("pH = ");
+  Serial.print(values.pHlvl);
   Serial.println();
   delay(2000);
 
