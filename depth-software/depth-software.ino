@@ -27,6 +27,8 @@ struct air_result {
   float pH;
   } values;
 
+
+//Code based on https://forum.arduino.cc/index.php?topic=336012.0
 void pH(){
   int measure;
   int n = 15;
@@ -46,6 +48,12 @@ void pH(){
   
   values.pH = Po;
 }
+
+//GPS based on http://arduinostuff.blogspot.ca/2014/05/neo6mv2-gps-module-with-arduino-uno-how.html
+void gps(){
+  
+}
+
 int air(){
   // READ DATA
 //  Serial.print("DHT11, \t");

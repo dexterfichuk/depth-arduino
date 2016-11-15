@@ -13,7 +13,7 @@ Red -> 5V
 
 Black -> Ground
 
-Yellow -> 4.7Ohms Resistor -> Pin 8
+Yellow -> 4.7kΩ Resistor -> Pin 8
 
 ###Air Temp & Humidity
 Black -> Ground
