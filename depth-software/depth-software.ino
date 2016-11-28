@@ -105,7 +105,7 @@ void waterTemp(){
   
   if ( !ds.search(addr)) {
 //    Serial.println("No more addresses.");
-    Serial.println();
+    //Serial.println();
     ds.reset_search();
     delay(250);
     return;
@@ -132,7 +132,7 @@ void waterTemp(){
   }
 //  Serial.print(" CRC=");
 //  Serial.print(OneWire::crc8(data, 8), HEX);
-  Serial.println();
+//  Serial.println();
 
   // Convert the data to actual temperature
   // because the result is a 16 bit signed integer, it should
@@ -171,27 +171,36 @@ void loop(void) {
    
   pH();
    
-  Serial.print("Water Temperature = ");
+//  Serial.print("Water Temperature = ");
+//  Serial.print(values.waterTemp);
+//  Serial.print(" Celsius");
+//  Serial.println();
+//  
+//  Serial.print("Air Temperature = ");
+//  Serial.print(values.airTemp);
+//  Serial.print(" Celsius");
+//  Serial.println();
+//  
+//  Serial.print("Air Humidity = ");
+//  Serial.print(values.humid);
+//  Serial.println();
+//
+//  Serial.print("pH = ");
+//  Serial.print(values.pH);
+//  Serial.println();
+
+  Serial.println("nodeid=3&waterTemp=");
   Serial.print(values.waterTemp);
-  Serial.print(" Celsius");
-  Serial.println();
-  
-  Serial.print("Air Temperature = ");
+  Serial.print("&airTemp=");
   Serial.print(values.airTemp);
-  Serial.print(" Celsius");
-  Serial.println();
-  
-  Serial.print("Air Humidity = ");
+  Serial.print("&airHumidity=")
   Serial.print(values.humid);
-  Serial.println();
-
-  Serial.print("pH = ");
+  Serial.print("&pH=");
   Serial.print(values.pH);
-  Serial.println();
-
+  
   //Already delayed in the ph calculations
   //delay(2000);
-  ethernetPost();
+  //ethernetPost();
 }
 
 void ethernetPost(){
