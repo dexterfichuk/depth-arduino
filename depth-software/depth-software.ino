@@ -189,17 +189,18 @@ void loop(void) {
 //  Serial.print(values.pH);
 //  Serial.println();
 
-  Serial.println("nodeid=3&waterTemp=");
+  Serial.print("nodeid=5&waterTemp=");
   Serial.print(values.waterTemp);
   Serial.print("&airTemp=");
   Serial.print(values.airTemp);
-  Serial.print("&airHumidity=")
+  Serial.print("&airHumidity=");
   Serial.print(values.humid);
   Serial.print("&pH=");
   Serial.print(values.pH);
-  
+
+  Serial.println();
   //Already delayed in the ph calculations
-  //delay(2000);
+  delay(2000);
   //ethernetPost();
 }
 
