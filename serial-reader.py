@@ -5,6 +5,7 @@ import urllib2
 from elasticsearch import Elasticsearch
 import urlparse
 from datetime import datetime
+import time
 
 
 es = Elasticsearch([{'host': '138.197.141.125', 'port': 9200}])
@@ -26,17 +27,18 @@ while True:
 
     print urlparse.parse_qs(parsed.query)['nodeid'][0]
 
-    es.index(index="project_depth_1",
-                 doc_type="depth_test",
-                 body={"nodeid": urlparse.parse_qs(parsed.query)['nodeid'][0],
-                       "waterTemp": urlparse.parse_qs(parsed.query)['waterTemp'][0],
-                       "airTemp": urlparse.parse_qs(parsed.query)['airTemp'][0],
-                       "airHumidity": urlparse.parse_qs(parsed.query)['airHumidity'][0],
-                       "pH": urlparse.parse_qs(parsed.query)['pH'][0],
-			            "location": { 
+    es.index(index="project_depth_7",
+                 doc_type="dep",
+                 body={"nodeid": float(urlparse.parse_qs(parsed.query)['nodeid'][0]),
+                       "waterTemp": float(urlparse.parse_qs(parsed.query)['waterTemp'][0]),
+                       "airTemp": float(urlparse.parse_qs(parsed.query)['airTemp'][0]),
+                       "airHumidity": float(urlparse.parse_qs(parsed.query)['airHumidity'][0]),
+                       "pH": float(urlparse.parse_qs(parsed.query)['pH'][0]),
+			            "geo_point": { 
                             "lat":     40.722,
                             "lon":    -73.989
-                            }
+                            },
+                        "timestamp": datetime.now()
                         })
     
     sleep(.1) # Delay for one tenth of a second
