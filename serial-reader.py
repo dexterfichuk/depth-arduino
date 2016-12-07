@@ -7,8 +7,24 @@ import urlparse
 from datetime import datetime
 import time
 
+kIndex = "project_depth_9"
 
 es = Elasticsearch([{'host': '138.197.141.125', 'port': 9200}])
+
+mapping = {
+        "mappings": {
+            "depth-mappings": {
+                "properties": {
+                    "location": {
+                        "type": "geo_point"
+                    }
+                }
+            }
+        }
+    }
+
+es.indices.create(index=kIndex, body=mapping)
+
 
 ser = serial.Serial('/dev/ttyUSB0', 9600) # Establish the connection on a specific port
 counter = 32 # Below 32 everything in ASCII is gibberish
@@ -23,18 +39,8 @@ while True:
     parsed = urlparse.urlparse("http://159.203.4.227/depth/add.php?key=Saucy&%s" % message)
 
     print urlparse.parse_qs(parsed.query)['nodeid'][0]
-    mapping = {
-        "mappings": {
-            "depth-mappings": {
-                "properties": {
-                    "location": {
-                        "type": "geo_point"
-                    }
-                }
-            }
-        }
-    }
-    es.index(index="project_depth_9",
+    
+    es.index(index=kIndex,
                  doc_type="depth-mappings",
                  body={"nodeid":int(urlparse.parse_qs(parsed.query)['nodeid'][0]),
                        "waterTemp": float(urlparse.parse_qs(parsed.query)['waterTemp'][0]),
