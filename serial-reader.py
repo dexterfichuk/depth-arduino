@@ -17,26 +17,33 @@ while True:
     ser.write(str(chr(counter))) # Convert the decimal number to ASCII then send it to the Arduino
     message = ser.readline()
     print message # Read the newest output from the Arduino
-    #  GET Attempt 1
-    # Test message
-    # message = "nodeid=4&waterTemp=38"
 
     urllib2.urlopen("http://159.203.4.227/depth/add.php?key=Saucy&%s" % message).read()
 
     parsed = urlparse.urlparse("http://159.203.4.227/depth/add.php?key=Saucy&%s" % message)
 
     print urlparse.parse_qs(parsed.query)['nodeid'][0]
-
-    es.index(index="project_depth_7",
-                 doc_type="dep",
-                 body={"nodeid": float(urlparse.parse_qs(parsed.query)['nodeid'][0]),
+    mapping = {
+        "mappings": {
+            "depth-mappings": {
+                "properties": {
+                    "location": {
+                        "type": "geo_point"
+                    }
+                }
+            }
+        }
+    }
+    es.index(index="project_depth_9",
+                 doc_type="depth-mappings",
+                 body={"nodeid":int(urlparse.parse_qs(parsed.query)['nodeid'][0]),
                        "waterTemp": float(urlparse.parse_qs(parsed.query)['waterTemp'][0]),
                        "airTemp": float(urlparse.parse_qs(parsed.query)['airTemp'][0]),
                        "airHumidity": float(urlparse.parse_qs(parsed.query)['airHumidity'][0]),
                        "pH": float(urlparse.parse_qs(parsed.query)['pH'][0]),
-			            "geo_point": { 
-                            "lat":     40.722,
-                            "lon":    -73.989
+			            "location": { 
+                            "lat": 40.722,
+                            "lon":-73.989
                             },
                         "timestamp": datetime.now()
                         })

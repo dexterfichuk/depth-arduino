@@ -200,7 +200,7 @@ void loop(void) {
 
   Serial.println();
   //Already delayed in the ph calculations
-  delay(2000);
+  delay(1000);
   //ethernetPost();
 }
 
