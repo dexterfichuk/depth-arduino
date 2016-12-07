@@ -23,7 +23,7 @@ mapping = {
         }
     }
 
-es.indices.create(index=kIndex, body=mapping)
+#es.indices.create(index=kIndex, body=mapping)
 
 
 ser = serial.Serial('/dev/ttyUSB0', 9600) # Establish the connection on a specific port
@@ -48,8 +48,8 @@ while True:
                        "airHumidity": float(urlparse.parse_qs(parsed.query)['airHumidity'][0]),
                        "pH": float(urlparse.parse_qs(parsed.query)['pH'][0]),
 			            "location": { 
-                            "lat": 40.722,
-                            "lon":-73.989
+                            "lat": 43.239,
+                            "lon":-75.34897
                             },
                         "timestamp": datetime.now()
                         })
