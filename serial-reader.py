@@ -7,9 +7,9 @@ import urlparse
 from datetime import datetime
 import time
 
-kIndex = "project_depth_9"
+kIndex = "project_depth"
 
-es = Elasticsearch([{'host': '138.197.141.125', 'port': 9200}])
+es = Elasticsearch([{'host': '192.249.134.192', 'port': 9200}])
 
 mapping = {
         "mappings": {
@@ -23,7 +23,7 @@ mapping = {
         }
     }
 
-#es.indices.create(index=kIndex, body=mapping)
+# es.indices.create(index=kIndex, body=mapping)
 
 
 ser = serial.Serial('/dev/ttyUSB0', 9600) # Establish the connection on a specific port
