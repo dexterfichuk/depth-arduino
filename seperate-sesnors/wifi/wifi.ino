@@ -50,8 +50,12 @@ void setup() {
  
     //if you get here you have connected to the WiFi
     Serial.println("connected... :)");
+
+    //Start Dallas Temp Sensor    
+    sensors.begin(); 
 }
 
+//Struct for holding all values
 struct air_result { 
   float airTemp; 
   float humid;
@@ -63,3 +67,38 @@ struct air_result {
 void loop() {
     // put your main code here, to run repeatedly:
 }
+
+void waterTemp(){
+  sensors.requestTemperatures();
+  values.waterTemp = sensors.getTempCByIndex(0);
+}
+
+void air(){
+  DHT.read11(DHT11_PIN);
+  
+  // DISPLAY DATA
+  float temp = DHT.temperature;
+  float humid = DHT.humidity;
+  
+  values.airTemp = temp;
+  values.humid = humid;
+}
+
+//Code based on https://forum.arduino.cc/index.php?topic=336012.0
+void pH(){
+  int measure;
+  int n = 15;
+  float voltage; //classic digital to voltage conversion
+
+  float Po = 0;
+  for (int i = 0; i < n; i++){ //Loop to make sum
+    measure = analogRead(ph_pin);
+    voltage = (5 / 1024.0 * measure) - 0.037;
+    Po += (7 + ((2.5 - voltage) / 0.18)) + offset;
+    delay(100);
+  }
+  Po /= n;
+  values.pH = Po;
+}
+
+
