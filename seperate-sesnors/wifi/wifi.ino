@@ -4,21 +4,28 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
-//For Water Temperature Reading
-#include <OneWire.h>
+/********************************************************************/
+// First we include the libraries
+#include <OneWire.h> 
+#include <DallasTemperature.h>
+/********************************************************************/
+// Data wire is plugged into pin 2 on the Arduino 
 
 //Used for Air Temp/Humidity
 #include <dht.h>
 dht DHT;
 
 //Declare Variables 
-//OneWire  ds(8);  // on pin 10 (a 4.7K resistor is necessary)
 
 float offset = 0.0; //Calculated from measuring with chem thing
 
-#define DHT11_PIN 16 // Humidity Pin  : D2
-int ph_pin = A0;     // pH Pin        : A0
+int ph_pin = A0;        // pH Pin        : A0
+#define DHT11_PIN 16    // Humidity Pin  : D2
+#define ONE_WIRE_BUS 12 // Water Temp    : D8
 
+OneWire oneWire(ONE_WIRE_BUS); 
+
+DallasTemperature sensors(&oneWire);
  
 void setup() {
     // put your setup code here, to run once:
