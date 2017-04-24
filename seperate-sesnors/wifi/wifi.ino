@@ -16,7 +16,7 @@
 dht DHT;
 
 //Declare Variables 
-String const NODENUM = "5005";
+String const NODENUM = "5010";
 float offset = 0.0; //Calculated from measuring with chem thing
 
 int ph_pin = A0;        // pH Pin        : A0
@@ -24,7 +24,12 @@ int ph_pin = A0;        // pH Pin        : A0
 #define ONE_WIRE_BUS 12 // Water Temp    : D8
 
 //Depth DB API
-const char* host = "http://159.203.4.227/depth/add.php?key=Saucy&";
+const char* host = "http://159.203.4.227";
+
+IPAddress server(159,203,4,227);  // Google
+
+// Initialize the client library
+WiFiClient client;
 
 OneWire oneWire(ONE_WIRE_BUS); 
 
@@ -37,8 +42,8 @@ void setup() {
     //WiFiManager
     //Local intialization. Once its business is done, there is no need to keep it around
     WiFiManager wifiManager;
-    //reset saved settings
-    wifiManager.resetSettings();
+    //reset saved settings for demo use
+//    wifiManager.resetSettings();
  
     //set custom ip for portal
     wifiManager.setAPStaticIPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
@@ -68,10 +73,12 @@ struct air_result {
   } values;
  
 void loop() {
+//Update Readings
   waterTemp();
   air();
   pH(); 
-
+  
+//Print out readings for debugging
   Serial.print("Water Temperature = ");
   Serial.print(values.waterTemp);
   Serial.print(" Celsius");
@@ -90,18 +97,21 @@ void loop() {
   Serial.print(values.pH);
   Serial.println();
 
-  delay(1000);
+  updateDB();
+  
+  delay(5000);
 }
 
+//GET request to DB
 void updateDB(){
-  WiFiClient client;
+
   const int httpPort = 80;
-  if (!client.connect(host, httpPort)) {
-    Serial.println("connection failed");
-    return;
-  }
+//  if (!client.connect(host, httpPort)) {
+//    Serial.println("connection failed");
+//    return;
+//  }
     // We now create a URI for the request
-  String url = "nodeID=";
+  String url = "/depth/add.php?key=Saucy&nodeid=";
   url += NODENUM;
   url += "&airTemp=";
   url += values.airTemp;
@@ -111,22 +121,27 @@ void updateDB(){
   url += values.pH;
   url += "&waterTemp=";
   url += values.waterTemp;
-  
-  Serial.print("Requesting URL: ");
-  Serial.println(url);
-  
-  // This will send the request to the server
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" + 
-               "Connection: close\r\n\r\n");
-  unsigned long timeout = millis();
-  while (client.available() == 0) {
-    if (millis() - timeout > 5000) {
-      Serial.println(">>> Client Timeout !");
-      client.stop();
-      return;
-   }
-  }
+  if (client.connect(server, 80)) {
+      Serial.println("connected");
+      // Make a HTTP request:
+      client.println(String("GET ") + url + " HTTP/1.0");
+      client.println();
+    }
+//  Serial.print("Requesting URL: ");
+//  Serial.println(url);
+//  
+//  // This will send the request to the server
+//  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+//               "Host: " + host + "\r\n" + 
+//               "Connection: close\r\n\r\n");
+//  unsigned long timeout = millis();
+//  while (client.available() == 0) {
+//    if (millis() - timeout > 5000) {
+//      Serial.println(">>> Client Timeout !");
+//      client.stop();
+//      return;
+//   }
+//  }
 }
 
 void waterTemp(){
