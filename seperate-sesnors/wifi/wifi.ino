@@ -34,7 +34,17 @@ WiFiClient client;
 OneWire oneWire(ONE_WIRE_BUS); 
 
 DallasTemperature sensors(&oneWire);
- 
+
+//Struct for holding all values
+struct result { 
+  float airTemp; 
+  float humid;
+  float waterTemp;
+  float pH;
+  float turbidity;
+  String IP;
+  } values;
+
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
@@ -43,8 +53,13 @@ void setup() {
     //Local intialization. Once its business is done, there is no need to keep it around
     WiFiManager wifiManager;
     //reset saved settings for demo use
-//    wifiManager.resetSettings();
- 
+    wifiManager.resetSettings();
+
+//    Custom stuff from here https://github.com/tzapu/WiFiManager#custom-parameters
+    WiFiManagerParameter custom_text("<p>Rememeber that you must add your Node to your</p><a href='http://159.203.4.227' target='_blank'>Depth Dashboard</a>");
+    wifiManager.addParameter(&custom_text);
+//    wifiManager.setCustomHeadElement("<style>html{filter: invert(100%); -webkit-filter: invert(100%);}</style>");
+
     //set custom ip for portal
     wifiManager.setAPStaticIPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
  
@@ -58,19 +73,12 @@ void setup() {
  
     //if you get here you have connected to the WiFi
     Serial.println("connected... :)");
-
+//    values.IP = Wifi.localIP();
     //Start Dallas Temp Sensor    
     sensors.begin(); 
 }
 
-//Struct for holding all values
-struct air_result { 
-  float airTemp; 
-  float humid;
-  float waterTemp;
-  float pH;
-  float turbidity;
-  } values;
+
  
 void loop() {
 //Update Readings
@@ -79,6 +87,7 @@ void loop() {
   pH(); 
   
 //Print out readings for debugging
+  Serial.println(values.IP);
   Serial.print("Water Temperature = ");
   Serial.print(values.waterTemp);
   Serial.print(" Celsius");
@@ -97,20 +106,17 @@ void loop() {
   Serial.print(values.pH);
   Serial.println();
 
-  updateDB();
+//  updateDB();
   
-  delay(5000);
+  delay(10000);
 }
 
 //GET request to DB
 void updateDB(){
 
   const int httpPort = 80;
-//  if (!client.connect(host, httpPort)) {
-//    Serial.println("connection failed");
-//    return;
-//  }
-    // We now create a URI for the request
+  
+  // We now create a URI for the request
   String url = "/depth/add.php?key=Saucy&nodeid=";
   url += NODENUM;
   url += "&airTemp=";
@@ -127,21 +133,6 @@ void updateDB(){
       client.println(String("GET ") + url + " HTTP/1.0");
       client.println();
     }
-//  Serial.print("Requesting URL: ");
-//  Serial.println(url);
-//  
-//  // This will send the request to the server
-//  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-//               "Host: " + host + "\r\n" + 
-//               "Connection: close\r\n\r\n");
-//  unsigned long timeout = millis();
-//  while (client.available() == 0) {
-//    if (millis() - timeout > 5000) {
-//      Serial.println(">>> Client Timeout !");
-//      client.stop();
-//      return;
-//   }
-//  }
 }
 
 void waterTemp(){
