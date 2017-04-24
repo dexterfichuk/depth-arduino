@@ -1,11 +1,24 @@
+//For Wifi
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
- 
-//needed for library
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
-String const nodeID = "5005";
+//For Water Temperature Reading
+#include <OneWire.h>
+
+//Used for Air Temp/Humidity
+#include <dht.h>
+dht DHT;
+
+//Declare Variables 
+//OneWire  ds(8);  // on pin 10 (a 4.7K resistor is necessary)
+
+float offset = 0.0; //Calculated from measuring with chem thing
+
+#define DHT11_PIN 16 // Humidity Pin  : D2
+int ph_pin = A0;     // pH Pin        : A0
+
  
 void setup() {
     // put your setup code here, to run once:
@@ -31,6 +44,14 @@ void setup() {
     //if you get here you have connected to the WiFi
     Serial.println("connected... :)");
 }
+
+struct air_result { 
+  float airTemp; 
+  float humid;
+  float waterTemp;
+  float pH;
+  float turbidity;
+  } values;
  
 void loop() {
     // put your main code here, to run repeatedly:
