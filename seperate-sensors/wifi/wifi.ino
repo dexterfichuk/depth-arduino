@@ -7,6 +7,19 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
+#include <OneWire.h>
+
+//Used for Air Temp/Humidity
+#include <DHT.h>
+
+OneWire  ds(8);  // on pin 10 (a 4.7K resistor is necessary)
+int ph_pin = A0; //This is the pin number connected to Po for PH 
+float offset = 0.0; //Calculated from measuring with chem thing
+//dht DHT;
+
+#define DHT11_PIN 2 //Air sensor pin
+
+
 const char* host = "159.203.4.227/depth";
 
  
