@@ -53,11 +53,11 @@ void setup() {
     //Local intialization. Once its business is done, there is no need to keep it around
     WiFiManager wifiManager;
     //reset saved settings for demo use
-    wifiManager.resetSettings();
+//    wifiManager.resetSettings();
 
 //    Custom stuff from here https://github.com/tzapu/WiFiManager#custom-parameters
-    WiFiManagerParameter custom_text("<p>Rememeber that you must add your Node to your</p><a href='http://159.203.4.227' target='_blank'>Depth Dashboard</a>");
-    wifiManager.addParameter(&custom_text);
+//    WiFiManagerParameter custom_text("<p>Rememeber that you must add your Node to your</p><a href='http://159.203.4.227' target='_blank'>Depth Dashboard</a>");
+//    wifiManager.addParameter(&custom_text);
 //    wifiManager.setCustomHeadElement("<style>html{filter: invert(100%); -webkit-filter: invert(100%);}</style>");
 
     //set custom ip for portal
@@ -76,6 +76,8 @@ void setup() {
 //    values.IP = Wifi.localIP();
     //Start Dallas Temp Sensor    
     sensors.begin(); 
+
+    GetExternalIP();
 }
 
 
@@ -166,6 +168,32 @@ void pH(){
   }
   Po /= n;
   values.pH = Po;
+}
+
+void GetExternalIP()
+{
+  WiFiClient client;
+  if (!client.connect("api.ipify.org", 80)) {
+    Serial.println("Failed to connect with 'api.ipify.org' !");
+  }
+  else {
+    int timeout = millis() + 5000;
+    client.print("GET /?format=json HTTP/1.1\r\nHost: api.ipify.org\r\n\r\n");
+    while (client.available() == 0) {
+      if (timeout - millis() < 0) {
+        Serial.println(">>> Client Timeout !");
+        client.stop();
+        return;
+      }
+    }
+    int size;
+    while ((size = client.available()) > 0) {
+      uint8_t* msg = (uint8_t*)malloc(size);
+      size = client.read(msg, size);
+      Serial.write(msg, size);
+      free(msg);
+    }
+  }
 }
 
 
