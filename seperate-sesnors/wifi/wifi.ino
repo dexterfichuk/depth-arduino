@@ -15,13 +15,17 @@
 #include <dht.h>
 dht DHT;
 
+//Used for tubidity
+
+
 //Declare Variables 
 String const NODENUM = "5010";
 float offset = 0.0; //Calculated from measuring with chem thing
 
 int ph_pin = A0;        // pH Pin        : A0
 #define DHT11_PIN 16    // Humidity Pin  : D2
-#define ONE_WIRE_BUS 12 // Water Temp    : D8
+#define ONE_WIRE_BUS 12 // Water Temp    : D6
+int sensor_in = D4;      // Turbidity     : D4
 
 //Depth DB API
 const char* host = "http://159.203.4.227";
@@ -41,14 +45,14 @@ struct result {
   float humid;
   float waterTemp;
   float pH;
-  float turbidity;
-  String IP;
+  String turbidity;
   } values;
 
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
- 
+    //turbidity
+    pinMode(sensor_in, INPUT);
     //WiFiManager
     //Local intialization. Once its business is done, there is no need to keep it around
     WiFiManager wifiManager;
@@ -77,19 +81,16 @@ void setup() {
     //Start Dallas Temp Sensor    
     sensors.begin(); 
 
-    GetExternalIP();
 }
-
-
  
 void loop() {
 //Update Readings
   waterTemp();
   air();
   pH(); 
+  turbidity();
   
 //Print out readings for debugging
-  Serial.println(values.IP);
   Serial.print("Water Temperature = ");
   Serial.print(values.waterTemp);
   Serial.print(" Celsius");
@@ -108,9 +109,13 @@ void loop() {
   Serial.print(values.pH);
   Serial.println();
 
-//  updateDB();
+  Serial.print("Turbidity = ");
+  Serial.print(values.turbidity);
+  Serial.println();
+
+  updateDB();
   
-  delay(10000);
+    delay(10000);
 }
 
 //GET request to DB
@@ -129,8 +134,11 @@ void updateDB(){
   url += values.pH;
   url += "&waterTemp=";
   url += values.waterTemp;
+  url += "&turbidity=";
+  url += values.turbidity;
+  
   if (client.connect(server, 80)) {
-      Serial.println("connected");
+      Serial.println("Writing to DB...");
       // Make a HTTP request:
       client.println(String("GET ") + url + " HTTP/1.0");
       client.println();
@@ -140,6 +148,10 @@ void updateDB(){
 void waterTemp(){
   sensors.requestTemperatures();
   values.waterTemp = sensors.getTempCByIndex(0);
+}
+
+void turbidity(){
+  values.turbidity = digitalRead(sensor_in);
 }
 
 void air(){
@@ -168,32 +180,6 @@ void pH(){
   }
   Po /= n;
   values.pH = Po;
-}
-
-void GetExternalIP()
-{
-  WiFiClient client;
-  if (!client.connect("api.ipify.org", 80)) {
-    Serial.println("Failed to connect with 'api.ipify.org' !");
-  }
-  else {
-    int timeout = millis() + 5000;
-    client.print("GET /?format=json HTTP/1.1\r\nHost: api.ipify.org\r\n\r\n");
-    while (client.available() == 0) {
-      if (timeout - millis() < 0) {
-        Serial.println(">>> Client Timeout !");
-        client.stop();
-        return;
-      }
-    }
-    int size;
-    while ((size = client.available()) > 0) {
-      uint8_t* msg = (uint8_t*)malloc(size);
-      size = client.read(msg, size);
-      Serial.write(msg, size);
-      free(msg);
-    }
-  }
 }
 
 
